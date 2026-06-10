@@ -8,7 +8,12 @@ services:
       - .:/var/www/html
 
   php-fpm:
-    build: ./docker
+    build:
+        context: .
+        dockerfile: docker/Dockerfile
+        args:
+            USER_ID: ${UID}
+            GROUP_ID: ${GID}
     volumes:
       - .:/var/www/html
       - ./docker/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-xdebug.ini
@@ -17,8 +22,8 @@ services:
     volumes:
       - ./docker/postgres/pgdata:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
       - 54324:5432
