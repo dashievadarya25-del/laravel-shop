@@ -30,8 +30,8 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN groupmod -g ${GID} www-data \
-    && usermod -u ${UID} -g www-data www-data
+RUN groupmod -g 1000 www-data \
+    && usermod -u 1000 -g www-data www-data
 WORKDIR /var/www/html
 
 USER www-data
