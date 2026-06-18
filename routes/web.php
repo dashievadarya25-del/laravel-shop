@@ -23,9 +23,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/change-password', [RegisterController::class, 'updatePassword'])->name('password.update');
 });
 
-Route::get('/profile', function () {
-    return 'Welcome to your profile!';
-})->middleware('auth');
+//Route::get('/profile', function () {
+//    return 'Welcome to your profile!';
+//})->middleware('auth');
 
 
 

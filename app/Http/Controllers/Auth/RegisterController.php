@@ -7,6 +7,7 @@ use App\DTOs\UpdateProfileDto;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Services\Auth\UserService;
 use Illuminate\Contracts\View\Factory;
@@ -77,5 +78,31 @@ class RegisterController extends Controller
             ->updateProfile($dto);
 
         return redirect()->route('profile.form');
+    }
+
+    public function showChangePasswordForm(): Factory|View
+    {
+        return view('auth.change-password');
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
+    {
+        $validatedData = $request->validated();
+        $user = Auth::user();
+
+        $this
+            ->userService
+            ->updatePassword(
+                $user,
+                $validatedData['current_password'],
+                $validatedData['new_password']
+            );
+
+        return redirect()
+            ->route('profile.form')
+            ->with('status', 'Password successfully changed!');
     }
 }
