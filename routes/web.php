@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -11,6 +14,10 @@ Route::middleware('guest')->group(function () {
     //login
     Route::get('/login', [RegisterController::class, 'showLoginForm'])->name('login.form');
     Route::post('/login', [RegisterController::class, 'login'])->name('login');
+
+    //product
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 });
 
 Route::middleware('auth')->group(function () {

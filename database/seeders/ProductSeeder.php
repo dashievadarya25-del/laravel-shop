@@ -1,30 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Product;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
     public function run(): void
     {
         Product::create([
-            'name' => 'iPhone 16 Pro',
-            'description' => 'Флагманский смартфон Apple',
-            'price' => 120000,
+            'name' => 'Kyocera PA4500',
+            'description' => 'Лазерный принтер',
+            'price' => 40299,
         ]);
 
         Product::create([
-            'name' => 'MacBook Pro',
-            'description' => 'Мощный ноутбук для разработчиков',
-            'price' => 250000,
+            'name' => 'Honor 600 Pro 512Гб',
+            'description' => 'Смартфон 8 ядерным процессором',
+            'price' => 74999,
         ]);
 
         Product::create([
-            'name' => 'Samsung Pro',
-            'description' => 'Смартфон нового поколения',
-            'price' => 100000,
+            'name' => 'HUAWEI Pura 80',
+            'description' => 'Смартфон',
+            'price' => 41999,
         ]);
     }
 }
