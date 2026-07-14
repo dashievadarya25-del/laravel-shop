@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\DTOs\ProductListDto;
-use App\Http\Requests\ProductListRequest;
+use App\DTOs\ProductFilterDto;
+use App\Http\Requests\ProductFilterRequest;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Contracts\View\Factory;
@@ -26,14 +26,12 @@ class ProductController extends Controller
             'product' => $product,
         ]);
     }
-    public function index(ProductListRequest $request): Factory|View
+    public function index(ProductFilterRequest $request): Factory|View
     {
-        $dto = ProductListDto::fromRequest($request);
+        $dto = ProductFilterDto::fromRequest($request);
         $products = $this->productService->getProducts($dto);
+        $maxPrice = $this->productService->getMaxProductPrice();
 
-        return view('products.index', [
-            'products' => $products,
-            'dto'      => $dto,
-        ]);
+        return view('products.index', compact('products', 'dto', 'maxPrice'));
     }
 }
