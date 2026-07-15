@@ -21,6 +21,10 @@
             </div>
 
             <div class="col-md-7">
+                <p>
+                    <strong>Категория:</strong>
+                    {{ $product->category?->name ?? 'Без категории' }}
+                </p>
                 <h1 class="h3 mb-3">{{ $product->name }}</h1>
                 <p class="fs-4 fw-semibold mb-3">{{ number_format($product->price, 0, ',', ' ') }} ₽</p>
 

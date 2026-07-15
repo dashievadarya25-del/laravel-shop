@@ -26,6 +26,7 @@ class ProductController extends Controller
             'product' => $product,
         ]);
     }
+
     public function index(ProductFilterRequest $request): Factory|View
     {
         $dto = ProductFilterDto::fromRequest($request);

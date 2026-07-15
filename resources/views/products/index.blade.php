@@ -31,7 +31,9 @@
                            class="form-control"
                            placeholder="Название или артикул">
                 </div>
-
+                <div class="text-muted">
+                    Категория: {{ $product->category?->name ?? 'Без категории' }}
+                </div>
                 <div class="col-6 col-lg-2">
                     <label for="min_price" class="form-label mb-1">Цена от</label>
                     <input type="number"
