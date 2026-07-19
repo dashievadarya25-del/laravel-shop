@@ -31,9 +31,7 @@
                            class="form-control"
                            placeholder="Название или артикул">
                 </div>
-                <div class="text-muted">
-                    Категория: {{ $product->category?->name ?? 'Без категории' }}
-                </div>
+
                 <div class="col-6 col-lg-2">
                     <label for="min_price" class="form-label mb-1">Цена от</label>
                     <input type="number"
@@ -107,7 +105,7 @@
                 <div class="col">
                     <div class="card h-100">
                         @if($product->image)
-                            <img src="{{ asset('storage/' . $product->image) }}"
+                            <img style="height: 180px; object-fit: cover;" src="{{ asset('storage/app/public/' . $product->image) }}"
                                  class="card-img-top"
                                  alt="{{ $product->name }}">
                         @else
@@ -119,17 +117,31 @@
 
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">{{ $product->name }}</h5>
+                            <p class="text-muted small mb-1">Категория: {{ $product->category?->name ?? 'Без категории' }}</p>
                             <p class="fw-semibold mb-3">{{ number_format($product->price, 0, ',', ' ') }} ₽</p>
 
-                            @php($detailsUrl = Route::has('products.show') ? route('products.show', $product) : '#')
-                            <a href="{{ $detailsUrl }}" class="btn btn-outline-primary mt-auto">
-                                Подробнее
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                            <div class="d-flex flex-column gap-2 mt-auto">
+                                <form method="POST"
+                                      action="{{ route('cart.items.store', $product) }}"
+                                      data-ajax-cart="1"
+                                      class="d-inline mb-0">
+                                    @csrf
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-primary w-100">В корзину</button>
+                                </form>
+
+                                @php($detailsUrl = Route::has('products.show') ? route('products.show', $product) : '#')
+                                <a href="{{ $detailsUrl }}" class="btn btn-outline-primary">
+                                    Подробнее
+                                </a>
+                            </div> {{-- Закрыли d-flex gap-2 --}}
+                        </div> {{-- Закрыли card-body --}}
+                    </div> {{-- Закрыли card --}}
+                </div> {{-- Закрыли col --}}
             @empty
-                <p>По заданным условиям товары не найдены.</p>
+                <div class="col-12">
+                    <p class="text-muted text-center py-4">По заданным условиям товары не найдены.</p>
+                </div>
             @endforelse
         </div>
 
