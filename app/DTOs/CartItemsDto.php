@@ -18,7 +18,6 @@ readonly class CartItemsDto
      */
     public static function fromRequest(FormRequest $request): self
     {
-        // Предотвращаем ошибку, если в store 'quantity' не был передан
         $quantity = $request->validated('quantity') ?? 1;
 
         return new self(

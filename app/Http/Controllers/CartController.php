@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CartController
 {
@@ -24,17 +25,12 @@ class CartController
 
     public function index(): Factory|View
     {
-        return view('cart.index', [
-            'items' => $this->sessionCartService->getItems(),
-            'totalQuantity' => $this->sessionCartService->getTotalQuantity(),
-            'totalPrice' => $this->sessionCartService->getTotalPrice(),
-        ]);
+        return view('cart.index', $this->getCartData());
     }
 
     public function store(Product $product, StoreCartItemRequest $request): JsonResponse|RedirectResponse
     {
         $dto = CartItemsDto::fromRequest($request);
-
         $this->sessionCartService->add($product, $dto);
 
         return $this->respond($request);
@@ -43,7 +39,6 @@ class CartController
     public function update(Product $product, UpdateCartItemRequest $request): JsonResponse|RedirectResponse
     {
         $dto = CartItemsDto::fromRequest($request);
-
         $this->sessionCartService->setQuantity($product, $dto);
 
         return $this->respond($request);
@@ -52,6 +47,7 @@ class CartController
     public function destroy(Product $product, Request $request): JsonResponse|RedirectResponse
     {
         $this->sessionCartService->remove($product);
+
         if ($this->sessionCartService->getTotalQuantity() === 0) {
             return $this->respondWithRedirect($request);
         }
@@ -65,25 +61,33 @@ class CartController
         return $this->respondWithRedirect($request);
     }
 
+    /**
+     * Формирует единый массив данных для обычного рендера и AJAX
+     */
+    private function getCartData(): array
+    {
+        return [
+            'items'          => $this->sessionCartService->getItems(),
+            'totalQuantity'  => $this->sessionCartService->getTotalQuantity(),
+            'totalPrice'     => $this->sessionCartService->getTotalPrice(),
+            'defaultAddress' => Auth::user()?->addresses()->where('is_default', true)->first(),
+        ];
+    }
+
     private function respond(Request $request): JsonResponse|RedirectResponse
     {
-        $payload = [
-            'cartCount' => $this->sessionCartService->getTotalQuantity(),
-        ];
+        $totalQuantity = $this->sessionCartService->getTotalQuantity();
 
         if ($request->expectsJson()) {
-            $payload['html'] = view('cart._content', [
-                'items' => $this->sessionCartService->getItems(),
-                'totalQuantity' => $this->sessionCartService->getTotalQuantity(),
-                'totalPrice' => $this->sessionCartService->getTotalPrice(),
-            ])->render();
-
-            return response()->json($payload);
+            return response()->json([
+                'cartCount' => $totalQuantity,
+                'html'      => view('cart._content', $this->getCartData())->render(),
+            ]);
         }
 
         return redirect()
             ->back()
-            ->with('cartCount', $payload['cartCount']);
+            ->with('cartCount', $totalQuantity);
     }
 
     private function respondWithRedirect(Request $request): JsonResponse|RedirectResponse
@@ -91,7 +95,7 @@ class CartController
         if ($request->expectsJson()) {
             return response()->json([
                 'cartCount' => 0,
-                'redirect'  => route('categories.index'), // Передаем URL для JS-скрипта
+                'redirect'  => route('categories.index'),
             ]);
         }
 

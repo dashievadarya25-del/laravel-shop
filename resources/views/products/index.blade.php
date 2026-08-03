@@ -105,7 +105,7 @@
                 <div class="col">
                     <div class="card h-100">
                         @if($product->image)
-                            <img style="height: 180px; object-fit: cover;" src="{{ asset('storage/app/public/' . $product->image) }}"
+                            <img style="height: 180px; object-fit: cover;" src="{{ asset($product->image) }}"
                                  class="card-img-top"
                                  alt="{{ $product->name }}">
                         @else

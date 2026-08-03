@@ -7,10 +7,12 @@ namespace App\Http\Controllers\Auth;
 use App\DTOs\RegisterDto;
 use App\DTOs\UpdateProfileDto;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddressStoreRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Models\Address;
 use App\Services\Auth\UserService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -69,16 +71,27 @@ class RegisterController extends Controller
     public function showProfile(): Factory|View
     {
         $user = Auth::user();
+        $addresses = $user->addresses()->get();
 
-        return view('auth.profile', compact('user'));
+        return view('auth.profile', compact('user', 'addresses'));
+    }
+
+    public function makeAddressDefault(Address $address): RedirectResponse
+    {
+        if ($address->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $this->userService->setDefaultAddress(Auth::user(), $address);
+
+        return back()->with('status', 'Основной адрес успешно изменен!');
     }
 
     public function updateProfile(UpdateProfileRequest $request): RedirectResponse
     {
         $dto = UpdateProfileDto::fromRequest($request);
-        $user = $this
-            ->userService
-            ->updateProfile($dto);
+        $user = auth()->user();
+        $this->userService->updateProfile($dto, $user);
 
         return redirect()->route('profile.form');
     }
@@ -107,5 +120,15 @@ class RegisterController extends Controller
         return redirect()
             ->route('profile.form')
             ->with('status', 'Password successfully changed!');
+    }
+
+    public function storeAddress(AddressStoreRequest $request): RedirectResponse
+    {
+        $this->userService->createAddress(
+            Auth::user(),
+            $request->validated()
+        );
+
+        return back()->with('status', 'Новый адрес успешно добавлен!');
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/change-password', [RegisterController::class, 'showChangePasswordForm'])->name('password.form');
     Route::post('/change-password', [RegisterController::class, 'updatePassword'])->name('password.update');
+    Route::patch('/profile/addresses/{address}/default', [RegisterController::class, 'makeAddressDefault'])->name('profile.addresses.default');
+    Route::post('/profile/addresses', [RegisterController::class, 'storeAddress'])->name('profile.addresses.store');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
+        ->name('orders.status.update');
 });
 
 Route::prefix('cart')->name('cart.')->group(function () {

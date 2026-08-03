@@ -6,6 +6,7 @@ namespace App\Services\Auth;
 
 use App\DTOs\RegisterDto;
 use App\DTOs\UpdateProfileDto;
+use App\Models\Address;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Auth;
@@ -22,9 +23,6 @@ class UserService
         $user->email = $dto->email;
         $user->password = Hash::make($dto->password);
         $user->save();
-
-        // TODO: после изучения очередей добавить событие для отправки приветственного письма:
-        // event(new Registered($user));
 
         return $user;
     }
@@ -53,5 +51,21 @@ class UserService
 
         $user->password = Hash::make($newPassword);
         $user->save();
+    }
+
+    public function setDefaultAddress(User $user, Address $address): void
+    {
+        $user->addresses()->update(['is_default' => false]);
+
+        $address->update(['is_default' => true]);
+    }
+
+    public function createAddress(User $user, array $data): Address
+    {
+        $isFirst = !$user->addresses()->exists();
+
+        return $user->addresses()->create(
+            array_merge($data, ['is_default' => $isFirst])
+        );
     }
 }
