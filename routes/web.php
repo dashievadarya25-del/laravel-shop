@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -43,6 +44,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
         ->name('orders.status.update');
 });
+
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::get('/', [DashboardController::class, 'index'])
+            ->name('dashboard');
+
+    });
 
 Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('index');
