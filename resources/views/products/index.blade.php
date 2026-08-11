@@ -9,11 +9,16 @@
 @extends('layouts.app')
 
 @section('title', 'Каталог товаров')
-
 @section('content')
-    <div class="container py-4">
-        <h1 class="h3 mb-3">Каталог товаров</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Каталог товаров</h1>
 
+    @can('admin-panel')
+    <a href="{{ route('admin.products.create') }}" class="btn btn-success">
+        ➕ Добавить товар
+    </a>
+    @endcan
+</div>
         @if($errors->any())
             <div class="alert alert-danger">
                 {{ $errors->first() }}
@@ -134,6 +139,28 @@
                                 <a href="{{ $detailsUrl }}" class="btn btn-outline-primary">
                                     Подробнее
                                 </a>
+
+                                @can('admin-panel')
+                                <div class="border-top pt-2 mt-1 d-flex gap-2">
+                                    {{-- Кнопка редактирования --}}
+                                    <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-warning w-50">
+                                        ✏️ Изменить
+                                    </a>
+
+                                    {{-- Кнопка удаления --}}
+                                    <form action="{{ route('admin.products.destroy', $product) }}"
+                                          method="POST"
+                                          class="w-50 mb-0"
+                                          onsubmit="return confirm('Вы уверены, что хотите удалить товар «{{ $product->name }}»?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">
+                                            🗑️ Удалить
+                                        </button>
+                                    </form>
+                                </div>
+                                @endcan
+
                             </div> {{-- Закрыли d-flex gap-2 --}}
                         </div> {{-- Закрыли card-body --}}
                     </div> {{-- Закрыли card --}}

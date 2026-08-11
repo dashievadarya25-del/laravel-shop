@@ -8,6 +8,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -53,6 +54,13 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/', [DashboardController::class, 'index'])
             ->name('dashboard');
 
+    });
+
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::resource('products', ProductManagementController::class);
     });
 
 Route::prefix('cart')->name('cart.')->group(function () {

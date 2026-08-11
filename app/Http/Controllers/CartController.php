@@ -16,7 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class CartController
+class CartController extends Controller
 {
     public function __construct(
         private SessionCartService $sessionCartService,
