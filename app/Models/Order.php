@@ -45,6 +45,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return self::STATUS_LABELS[$this->status] ?? $this->status;

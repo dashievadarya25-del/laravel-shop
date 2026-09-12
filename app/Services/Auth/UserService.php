@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Auth;
 
+use App\DTOs\Admin\UpdateUserDto;
 use App\DTOs\RegisterDto;
 use App\DTOs\UpdateProfileDto;
 use App\Models\Address;
@@ -11,6 +12,7 @@ use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class UserService
@@ -67,5 +69,50 @@ class UserService
         return $user->addresses()->create(
             array_merge($data, ['is_default' => $isFirst])
         );
+    }
+
+    public function createFromAdmin(array $data): User
+    {
+        $user = User::create([
+            'first_name' => $data['first_name'],
+            'last_name'  => $data['last_name'],
+            'email'      => $data['email'],
+            'status'     => $data['status'],
+            'password'   => Str::random(10),
+        ]);
+
+        if (!empty($data['role_id'])) {
+            $user->roles()->sync([$data['role_id']]);
+        }
+
+        return $user;
+    }
+
+    public function resetPassword(User $user, string $password): void
+    {
+        $user->update([
+            'password' => $password
+        ]);
+    }
+
+    public function updateByAdmin(User $user, UpdateUserDto $dto): User
+    {
+        $user->first_name = $dto->firstName;
+        $user->last_name = $dto->lastName;
+        $user->email = $dto->email;
+        $user->phone = $dto->phone;
+        $user->status = $dto->status;
+
+        if ($dto->password) {
+            $user->password = $dto->password;
+        }
+
+        $user->save();
+
+        if ($dto->roleId) {
+            $user->roles()->sync([$dto->roleId]);
+        }
+
+        return $user;
     }
 }

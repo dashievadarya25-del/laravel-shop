@@ -55,6 +55,17 @@ class RegisterController extends Controller
         $credentials = $request->validated();
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            if ($user->status === 'blocked') {
+                Auth::logout();
+
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors(['email' => 'Ваш аккаунт заблокирован администратором.']);
+            }
+
             return redirect()->intended('profile');
         }
 

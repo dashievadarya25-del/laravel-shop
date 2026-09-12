@@ -59,6 +59,54 @@ class OrderService
         });
     }
 
+    public function create(array $data): Order
+    {
+        return DB::transaction(function () use ($data): Order {
+            $total = 0;
+            foreach ($data['items'] as $item) {
+                $total += (float)$item['price'] * (int)$item['quantity'];
+            }
+
+            $order = Order::create([
+                'user_id'          => $data['user_id'],
+                'status'           => $data['status'],
+                'total'            => $total,
+                'shipping_address' => $data['shipping_address'] ?? null,
+                'payment_method'   => $data['payment_method'] ?? Order::PAYMENT_METHOD_CASH,
+            ]);
+
+            foreach ($data['items'] as $item) {
+                $order->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity'   => $item['quantity'],
+                    'price'      => $item['price'],
+                ]);
+            }
+
+            if ($data['status'] === Order::STATUS_PAID) {
+                $this->markAsPaid($order);
+            }
+
+            return $order;
+        });
+    }
+
+    public function updateStatusFromAdmin(Order $order, string $newStatus): void
+    {
+        if ($newStatus === Order::STATUS_PAID && $order->status === Order::STATUS_PENDING) {
+            $this->markAsPaid($order);
+            return;
+        }
+
+        if ($newStatus === Order::STATUS_CANCELED && $order->status === Order::STATUS_PENDING) {
+            $this->cancel($order);
+            return;
+        }
+
+        $order->status = $newStatus;
+        $order->save();
+    }
+
     public function markAsPaid(Order $order): void
     {
         if ($order->status !== Order::STATUS_PENDING) {
