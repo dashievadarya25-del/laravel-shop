@@ -14,6 +14,7 @@ use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\Address;
 use App\Services\Auth\UserService;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -40,9 +41,19 @@ class RegisterController extends Controller
             ->userService
             ->register($dto);
 
+        event(new Registered($user));
+        Auth::login($user);
+
         return redirect()
-            ->route('login.form')
-            ->with('status', 'Регистрация прошла успешно');
+            ->route('verification.notice')
+            ->with('status', 'Регистрация прошла успешно. Пожалуйста, подтвердите ваш Email.');
+    }
+
+    public function showVerifyEmailNotice(): \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+    {
+        return auth()->user()->hasVerifiedEmail()
+            ? redirect()->route('profile.form')
+            : view('auth.verify-email');
     }
 
     public function showLoginForm(): Factory|View
@@ -66,7 +77,11 @@ class RegisterController extends Controller
                 return back()->withErrors(['email' => 'Ваш аккаунт заблокирован администратором.']);
             }
 
-            return redirect()->intended('profile');
+            if (! $user->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice');
+            }
+
+            return redirect()->route('products.index');
         }
 
         return back()->withErrors(['email' => 'Invalid credentials']);
