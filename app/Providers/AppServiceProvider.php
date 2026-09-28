@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Listeners\SendWelcomeMessage; // ИМПОРТИРУЕМ НАШ LISTENER
 use App\Models\User;
+use Illuminate\Auth\Events\Verified;  // ИМПОРТИРУЕМ СОБЫТИЕ ВЕРИФИКАЦИИ
+use Illuminate\Support\Facades\Event; // ИМПОРТИРУЕМ ФАСАД СОВЫТИЙ
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,5 +31,11 @@ class AppServiceProvider extends ServiceProvider
             // Метод hasRole проверит, есть ли у юзера роль со slug = 'admin'
             return $user->hasRole('admin');
         });
+
+        // СВЯЗЫВАЕМ СОБЫТИЕ УСПЕШНОЙ ВЕРИФИКАЦИИ СО СЛУШАТЕЛЕМ ПРИВЕТСТВИЯ
+        Event::listen(
+            Verified::class,
+            SendWelcomeMessage::class
+        );
     }
 }

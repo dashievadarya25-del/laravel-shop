@@ -7,6 +7,7 @@ namespace App\Services\Auth;
 use App\DTOs\Admin\UpdateUserDto;
 use App\DTOs\RegisterDto;
 use App\DTOs\UpdateProfileDto;
+use App\Jobs\SendRegistrationVerificationJob;
 use App\Models\Address;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
@@ -25,6 +26,8 @@ class UserService
         $user->email = $dto->email;
         $user->password = Hash::make($dto->password);
         $user->save();
+
+        SendRegistrationVerificationJob::dispatch($user->id);
 
         return $user;
     }
