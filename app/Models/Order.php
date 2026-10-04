@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
@@ -14,6 +15,8 @@ class Order extends Model
     public const STATUS_SHIPPED = 'shipped';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELED = 'canceled';
+    public const PAYMENT_METHOD_CASH = 'cash';
+    public const PAYMENT_METHOD_YOOKASSA = 'yookassa';
 
     public const STATUS_LABELS = [
         self::STATUS_PENDING => 'Ожидает оплаты',
@@ -21,14 +24,12 @@ class Order extends Model
         self::STATUS_SHIPPED => 'Отправлен',
         self::STATUS_COMPLETED => 'Завершен',
         self::STATUS_CANCELED => 'Отменен',
-    ];
 
-    public const PAYMENT_METHOD_CASH = 'cash';
-    public const PAYMENT_METHOD_CARD = 'card';
+    ];
 
     public const PAYMENT_METHOD_LABELS = [
         self::PAYMENT_METHOD_CASH => 'Наличными при получении',
-        self::PAYMENT_METHOD_CARD => 'Картой при получении',
+        self::PAYMENT_METHOD_YOOKASSA => 'Онлайн через ЮKassa',
     ];
 
     protected $fillable = [
@@ -45,7 +46,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -59,4 +60,15 @@ class Order extends Model
     {
         return self::PAYMENT_METHOD_LABELS[$this->payment_method] ?? $this->payment_method;
     }
+
+    /**
+     * Связь с техническими платежами.
+     * У одного заказа может быть несколько попыток оплаты (сессий).
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(OrderPayment::class, 'order_id')
+            ->orderByDesc('created_at');
+    }
+
 }

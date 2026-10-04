@@ -9,6 +9,7 @@ use App\Http\Requests\OrderStoreRequest;
 use App\Models\Order;
 use App\Services\OrderService;
 use App\Services\SessionCartService;
+use App\Services\YooKassaPaymentService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -29,19 +30,35 @@ class OrderController
         ]);
     }
 
+    /**
+     * Создание заказа и запуск платежной цепочки
+     */
     public function store(
         OrderStoreRequest $request,
         OrderService $service,
-        SessionCartService $cart
+        SessionCartService $cart,
+        YooKassaPaymentService $yookassaService
     ): RedirectResponse {
         $user = Auth::user();
         $data = $request->validated();
 
-        $service->createOrder(
+        $order = $service->createOrder(
             $user,
             $data['payment_method'],
             $cart
         );
+
+        if ($data['payment_method'] === Order::PAYMENT_METHOD_YOOKASSA) {
+            $url = $yookassaService->createPaymentForOrder($order);
+
+            if ($url) {
+                return redirect()->away($url);
+            }
+
+            return redirect()
+                ->route('orders.index')
+                ->with('error', 'Заказ создан, но не удалось сгенерировать ссылку на оплату. Попробуйте оплатить из списка заказов.');
+        }
 
         return redirect()
             ->route('orders.index')

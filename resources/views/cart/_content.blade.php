@@ -119,7 +119,7 @@
                         @endif
                     </div>
 
-                    <h3 class="h6 mb-2">Способ оплаты</h3>
+                    <!-- <h3 class="h6 mb-2">Способ оплаты</h3>
 
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="payment_method" id="payment_cash" value="cash"
@@ -131,6 +131,26 @@
                         <input class="form-check-input" type="radio" name="payment_method" id="payment_card" value="card"
                             {{ old('payment_method') === 'card' ? 'checked' : '' }}>
                         <label class="form-check-label" for="payment_card">Картой при получении</label>
+                    </div>-->
+
+                    <!-- ОБНОВЛЕННЫЙ БЛОК: Динамический выбор способа оплаты -->
+                    <div class="mb-3">
+                        <h3 class="h6 mb-2">Способ оплаты</h3>
+
+                        @foreach(\App\Models\Order::PAYMENT_METHOD_LABELS as $value => $label)
+                            <div class="form-check {{ !$loop->first ? 'mt-1' : '' }}">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="payment_method"
+                                       id="payment_{{ $value }}"
+                                       value="{{ $value }}"
+                                       {{ old('payment_method', \App\Models\Order::PAYMENT_METHOD_CASH) === $value ? 'checked' : '' }}
+                                       required>
+                                <label class="form-check-label" for="payment_{{ $value }}">
+                                    {{ $label }}
+                                </label>
+                            </div>
+                        @endforeach
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100 mt-3 py-2 fw-bold">
