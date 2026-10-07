@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderAdminController;
+use App\Http\Controllers\Admin\OrderPaymentAdminController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CartController;
@@ -121,6 +122,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('orders', OrderAdminController::class);
 
         Route::resource('products', ProductManagementController::class);
+
+        Route::resource('payments', OrderPaymentAdminController::class)
+            ->only(['index', 'show']);
     });
 
 // Корзина
